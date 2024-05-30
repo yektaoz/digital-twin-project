@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,10 +7,7 @@ public class SensorStatusUI : MonoBehaviour
     private DataReceiver dataReceiver;
     public Image connectionIcon;
 
-    public Text statusText;
-
-    public Text humidityValueText, lightValueText, airQualityValueText, temperatureValueText;
-
+    public Text statusText,humidityValueText, lightValueText, airQualityValueText, temperatureValueText;
     public Button connectToServerButton;
 
     private void Start()
@@ -36,10 +31,9 @@ public class SensorStatusUI : MonoBehaviour
         connectToServerButton.onClick.RemoveAllListeners();
     }
 
-
     public void UpdateStatus(DataReceiver.SensorData sensorData = null)
     {
-        if(sensorData == null)
+        if (sensorData == null)
         {
             lightValueText.text = "-";
             humidityValueText.text = "-";
@@ -54,7 +48,7 @@ public class SensorStatusUI : MonoBehaviour
             temperatureValueText.text = sensorData.temperature.ToString();
             airQualityValueText.text = sensorData.airQuality == 0 ? "Good" : "Poor";
         }
-     
+
     }
 
 
@@ -65,7 +59,6 @@ public class SensorStatusUI : MonoBehaviour
         connectToServerButton.gameObject.SetActive(false);
         UpdateStatus();
     }
-
     public void ConnectionError()
     {
         connectionIcon.color = Color.red;
@@ -73,7 +66,6 @@ public class SensorStatusUI : MonoBehaviour
         connectToServerButton.gameObject.SetActive(true);
         UpdateStatus();
     }
-
     public void ConnectionLost()
     {
         connectionIcon.color = Color.red;
@@ -81,8 +73,5 @@ public class SensorStatusUI : MonoBehaviour
         connectToServerButton.gameObject.SetActive(true);
         UpdateStatus();
     }
-
-
-
 
 }
