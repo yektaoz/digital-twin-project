@@ -14,25 +14,43 @@ public class LightSensorHandler : MonoBehaviour
     public float dataMultiplier;
 
 
-    public float minusMax = 100000;
-    public float normalizedMax => minusMax * dataMultiplier;
+    public float calibrationValue = 100000;
+    public float normalizedMax => calibrationValue * dataMultiplier;
 
     public float InvertedValue => normalizedMax - LightValue;
 
     public float LightValue => dataMultiplier * lightSensorData;
-    public void UpdateLightData(float lastData) => lightSensorData = lastData;
 
-    public DataReceiver lightSensorReceiver;
+    public void UpdateLightData(DataReceiver.SensorData sensorData) => lightSensorData = sensorData.light;
 
+    private DataReceiver dataReceiver;
+
+
+    #region Simple Mode
+
+    public bool isSimpleMode;
+    public float thresholdToDim;
+    public float simpleModeBrightIntensity;
+
+    public bool IsDim => calibrationValue + thresholdToDim < lightSensorData;
+
+    #endregion
+
+
+    public void CalibrateTheSensor()
+    {
+        calibrationValue = lightSensorData;
+    }
 
     private void Start()
     {
-        lightSensorReceiver.OnLightDataReceiveWithValue += UpdateLightData;
+        dataReceiver = FindObjectOfType<DataReceiver>();
+        dataReceiver.OnDataReceiveWithData += UpdateLightData;
     }
 
     private void OnDestroy()
     {
-        lightSensorReceiver.OnLightDataReceiveWithValue -= UpdateLightData;
+        dataReceiver.OnDataReceiveWithData -= UpdateLightData;
     }
 
     private void Update()
@@ -41,11 +59,40 @@ public class LightSensorHandler : MonoBehaviour
         {
             if (smoothSync)
             {
-                lightSource.intensity = Mathf.Lerp(lightSource.intensity, InvertedValue, 2f * Time.deltaTime);
+                if (isSimpleMode)
+                {
+                    if (IsDim)
+                    {
+                        lightSource.intensity = Mathf.Lerp(lightSource.intensity, 0, 2f * Time.deltaTime);
+                    }
+                    else
+                    {
+                        lightSource.intensity = Mathf.Lerp(lightSource.intensity, simpleModeBrightIntensity, 2f * Time.deltaTime);
+                    }
+                }
+                else
+                {
+                    lightSource.intensity = Mathf.Lerp(lightSource.intensity, InvertedValue, 2f * Time.deltaTime);
+                }
             }
             else
             {
-                lightSource.intensity = InvertedValue;
+
+                if (isSimpleMode)
+                {
+                    if (IsDim)
+                    {
+                        lightSource.intensity = 0;
+                    }
+                    else
+                    {
+                        lightSource.intensity = simpleModeBrightIntensity;
+                    }
+                }
+                else
+                {
+                    lightSource.intensity = InvertedValue;
+                }
             }
         }
     }

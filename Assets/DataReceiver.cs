@@ -18,7 +18,10 @@ public class DataReceiver : MonoBehaviour
     public event Action<float> OnLightDataReceiveWithValue;
 
     public SensorData lastReceivedData;
+    public SensorData simulatedData;
     private bool isDataConnected;
+
+    public bool isSimulated;
 
 
     async void Start()
@@ -58,6 +61,11 @@ public class DataReceiver : MonoBehaviour
         }
     }
 
+
+    public void SimulationPush()
+    {
+        OnDataReceiveWithData?.Invoke(simulatedData);
+    }
 
     async void StartReceivingData()
     {
@@ -101,7 +109,14 @@ public class DataReceiver : MonoBehaviour
                         Debug.Log($"Processed humidity: {humidity}");
                         Debug.Log($"Processed airQuality: {airQuality}");
 
-                        OnDataReceiveWithData?.Invoke(lastReceivedData);
+                        if (isSimulated)
+                        {
+                            OnDataReceiveWithData?.Invoke(simulatedData);
+                        }
+                        else
+                        {
+                            OnDataReceiveWithData?.Invoke(lastReceivedData);
+                        }
 
                     }
                     else
@@ -116,6 +131,7 @@ public class DataReceiver : MonoBehaviour
             Debug.LogError($"Veri okuma hatası: {ex.Message}");
         }
     }
+
 
 
     [System.Serializable]
